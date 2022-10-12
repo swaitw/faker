@@ -1,429 +1,121 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { faker } from '../src';
+import { seededTests } from './support/seededRuns';
 
-const seededRuns = [
-  {
-    seed: 42,
-    expectations: {
-      past: [
-        new Date('2020-10-08T00:10:58.041Z'),
-        new Date('2020-10-08T00:10:57.330Z'),
-        new Date('2017-05-26T15:26:24.637Z'),
-        new Date('2017-05-26T15:26:23.926Z'),
-      ],
-      future: [
-        new Date('2021-07-08T10:07:33.381Z'),
-        new Date('2021-07-08T10:07:32.670Z'),
-        new Date('2024-11-19T18:52:06.785Z'),
-        new Date('2024-11-19T18:52:06.074Z'),
-      ],
-      between: [
-        new Date('2021-03-15T19:30:57.091Z'),
-        new Date('2021-07-29T19:19:12.731Z'),
-      ],
-      betweens: [
-        [
-          new Date('2021-03-08T11:09:46.211Z'),
-          new Date('2021-03-23T05:10:16.500Z'),
-          new Date('2021-04-06T23:10:46.500Z'),
-        ],
-        [
-          new Date('2021-03-08T11:09:45.500Z'),
-          new Date('2021-03-23T05:10:15.500Z'),
-          new Date('2021-04-06T23:10:45.500Z'),
-        ],
-      ],
-      recent: [
-        new Date('2021-02-21T08:11:56.820Z'),
-        new Date('2021-02-21T08:11:56.109Z'),
-      ],
-      soon: [
-        new Date('2021-03-13T23:15:38.042Z'),
-        new Date('2021-03-13T23:15:37.891Z'),
-      ],
-      month: {
-        default: 'May',
-        abbr: 'May',
-        context: 'May',
-        abbr_context: 'May',
-      },
-      weekday: {
-        default: 'Tuesday',
-        abbr: 'Tue',
-        context: 'Tuesday',
-        abbr_context: 'Tue',
-      },
-    },
-  },
-  {
-    seed: 1337,
-    expectations: {
-      past: [
-        new Date('2020-11-18T01:49:04.785Z'),
-        new Date('2020-11-18T01:49:04.074Z'),
-        new Date('2018-07-11T07:47:33.089Z'),
-        new Date('2018-07-11T07:47:32.378Z'),
-      ],
-      future: [
-        new Date('2021-05-28T08:29:26.637Z'),
-        new Date('2021-05-28T08:29:25.926Z'),
-        new Date('2023-10-06T02:30:58.333Z'),
-        new Date('2023-10-06T02:30:57.622Z'),
-      ],
-      between: [
-        new Date('2021-03-09T04:11:24.667Z'),
-        new Date('2021-06-12T02:21:47.178Z'),
-      ],
-      betweens: [
-        [
-          new Date('2021-03-08T11:09:46.211Z'),
-          new Date('2021-03-23T05:10:16.500Z'),
-          new Date('2021-04-06T23:10:46.500Z'),
-        ],
-        [
-          new Date('2021-03-08T11:09:45.500Z'),
-          new Date('2021-03-23T05:10:15.500Z'),
-          new Date('2021-04-06T23:10:45.500Z'),
-        ],
-      ],
-      recent: [
-        new Date('2021-02-21T10:53:58.041Z'),
-        new Date('2021-02-21T10:53:57.330Z'),
-      ],
-      soon: [
-        new Date('2021-03-13T20:33:36.821Z'),
-        new Date('2021-03-13T20:33:36.670Z'),
-      ],
-      month: {
-        default: 'April',
-        abbr: 'Apr',
-        context: 'April',
-        abbr_context: 'Apr',
-      },
-      weekday: {
-        default: 'Monday',
-        abbr: 'Mon',
-        context: 'Monday',
-        abbr_context: 'Mon',
-      },
-    },
-  },
-  {
-    seed: 1211,
-    expectations: {
-      past: [
-        new Date('2020-03-19T19:19:04.071Z'),
-        new Date('2020-03-19T19:19:03.360Z'),
-        new Date('2011-11-12T14:47:19.955Z'),
-        new Date('2011-11-12T14:47:19.244Z'),
-      ],
-      future: [
-        new Date('2022-01-26T14:59:27.351Z'),
-        new Date('2022-01-26T14:59:26.640Z'),
-        new Date('2030-06-03T19:31:11.467Z'),
-        new Date('2030-06-03T19:31:10.756Z'),
-      ],
-      between: [
-        new Date('2021-04-17T11:58:13.327Z'),
-        new Date('2022-03-21T16:37:15.905Z'),
-      ],
-      betweens: [
-        [
-          new Date('2021-03-08T11:09:46.211Z'),
-          new Date('2021-03-23T05:10:16.500Z'),
-          new Date('2021-04-06T23:10:46.500Z'),
-        ],
-        [
-          new Date('2021-03-08T11:09:45.500Z'),
-          new Date('2021-03-23T05:10:15.500Z'),
-          new Date('2021-04-06T23:10:45.500Z'),
-        ],
-      ],
-      recent: [
-        new Date('2021-02-20T18:54:13.498Z'),
-        new Date('2021-02-20T18:54:12.787Z'),
-      ],
-      soon: [
-        new Date('2021-03-14T12:33:21.364Z'),
-        new Date('2021-03-14T12:33:21.213Z'),
-      ],
-      month: {
-        default: 'December',
-        abbr: 'Dec',
-        context: 'December',
-        abbr_context: 'Dec',
-      },
-      weekday: {
-        default: 'Saturday',
-        abbr: 'Sat',
-        context: 'Saturday',
-        abbr_context: 'Sat',
-      },
-    },
-  },
+const converterMap = [
+  (d: Date) => d,
+  (d: Date) => d.toISOString(),
+  (d: Date) => d.valueOf(),
 ];
 
 const NON_SEEDED_BASED_RUN = 5;
+const refDate = '2021-02-21T17:09:15.711Z';
 
 describe('date', () => {
   afterEach(() => {
     faker.locale = 'en';
   });
 
-  for (const { seed, expectations } of seededRuns) {
-    describe(`seed: ${seed}`, () => {
-      describe('past()', () => {
-        it('should return deterministic past value on given refDate of type string', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.past(undefined, '2021-02-21T17:09:15.711Z');
-
-          expect(actual).toEqual(expectations.past[0]);
-        });
-
-        it('should return deterministic past value on given refDate of type date', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.past(
-            undefined,
-            new Date('2021-02-21T17:09:15.711Z')
-          );
-
-          expect(actual).toEqual(expectations.past[1]);
-        });
-
-        it('should return deterministic past value on given years 10 and refDate of type string', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.past(10, '2021-02-21T17:09:15.711Z');
-
-          expect(actual).toEqual(expectations.past[2]);
-        });
-
-        it('should return deterministic past value on given years 10 and refDate of type date', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.past(
-            10,
-            new Date('2021-02-21T17:09:15.711Z')
-          );
-
-          expect(actual).toEqual(expectations.past[3]);
-        });
-      });
-
-      describe('future()', () => {
-        it('should return deterministic future value on given refDate of type string', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.future(
-            undefined,
-            '2021-02-21T17:09:15.711Z'
-          );
-
-          expect(actual).toEqual(expectations.future[0]);
-        });
-
-        it('should return deterministic future value on given refDate of type date', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.future(
-            undefined,
-            new Date('2021-02-21T17:09:15.711Z')
-          );
-
-          expect(actual).toEqual(expectations.future[1]);
-        });
-
-        it('should return deterministic future value on given years 10 and refDate of type string', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.future(10, '2021-02-21T17:09:15.711Z');
-
-          expect(actual).toEqual(expectations.future[2]);
-        });
-
-        it('should return deterministic future value on given years 10 and refDate of type date', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.future(
-            10,
-            new Date('2021-02-21T17:09:15.711Z')
-          );
-
-          expect(actual).toEqual(expectations.future[3]);
-        });
-      });
-
-      describe('between()', () => {
-        it('should return deterministic value between given string dates', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.between(
-            '2021-02-21T17:09:15.711Z',
-            '2021-04-21T17:11:17.711Z'
-          );
-
-          expect(actual).toEqual(expectations.between[0]);
-        });
-
-        it('should return deterministic value between given real dates', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.between(
-            new Date('2021-02-21'),
-            new Date('2022-04-21')
-          );
-
-          expect(actual).toEqual(expectations.between[1]);
-        });
-      });
-
-      describe('betweens()', () => {
-        it('should return deterministic value betweens given string dates', () => {
-          faker.seed(seed);
-
-          // TODO @Shinigami92 2022-01-27: This function doesn't respect seeding
-          const actual = faker.date.betweens(
-            '2021-02-21T17:09:15.711Z',
-            '2021-04-21T17:11:17.711Z'
-          );
-
-          expect(actual).toEqual(expectations.betweens[0]);
-        });
-
-        it('should return deterministic value betweens given dates', () => {
-          faker.seed(seed);
-
-          // TODO @Shinigami92 2022-01-27: This function doesn't respect seeding
-          const actual = faker.date.betweens(
-            new Date('2021-02-21T17:09:15.711Z'),
-            new Date('2021-04-21T17:11:17.711Z')
-          );
-
-          expect(actual).toEqual(expectations.betweens[1]);
-        });
-      });
-
-      describe('recent()', () => {
-        it('should return deterministic value recent to given refDate of type string', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.recent(
-            undefined,
-            '2021-02-21T17:11:17.711Z'
-          );
-
-          expect(actual).toEqual(expectations.recent[0]);
-        });
-
-        it('should return deterministic value recent to given refDate of type date', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.recent(
-            undefined,
-            new Date('2021-02-21T17:11:17.711Z')
-          );
-
-          expect(actual).toEqual(expectations.recent[1]);
-        });
-      });
-
-      describe('soon()', () => {
-        it('should return deterministic value soon to given refDate of type string', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.soon(undefined, '2021-03-13T14:16:17.151Z');
-
-          expect(actual).toEqual(expectations.soon[0]);
-        });
-
-        it('should return deterministic value soon to given refDate of type date', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.soon(
-            undefined,
-            new Date('2021-03-13T14:16:17.151Z')
-          );
-
-          expect(actual).toEqual(expectations.soon[1]);
-        });
-      });
-
-      describe('month()', () => {
-        it('should return deterministic value month by default', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.month();
-
-          expect(actual).toEqual(expectations.month.default);
-        });
-
-        it('should return deterministic value month with abbr true', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.month({ abbr: true });
-
-          expect(actual).toEqual(expectations.month.abbr);
-        });
-
-        it('should return deterministic value month with context true', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.month({ context: true });
-
-          expect(actual).toEqual(expectations.month.context);
-        });
-
-        it('should return deterministic value month with abbr and context true', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.month({ abbr: true, context: true });
-
-          expect(actual).toEqual(expectations.month.abbr_context);
-        });
-      });
-
-      describe('weekday()', () => {
-        it('should return deterministic value weekday by default', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.weekday();
-
-          expect(actual).toEqual(expectations.weekday.default);
-        });
-
-        it('should return deterministic value weekday with abbr true', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.weekday({ abbr: true });
-
-          expect(actual).toEqual(expectations.weekday.abbr);
-        });
-
-        it('should return deterministic value weekday with context true', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.weekday({ context: true });
-
-          expect(actual).toEqual(expectations.weekday.context);
-        });
-
-        it('should return deterministic value weekday with abbr and context true', () => {
-          faker.seed(seed);
-
-          const actual = faker.date.weekday({ abbr: true, context: true });
-
-          expect(actual).toEqual(expectations.weekday.abbr_context);
-        });
-      });
+  seededTests(faker, 'date', (t) => {
+    t.describeEach(
+      'past',
+      'recent',
+      'soon',
+      'future'
+    )((t) => {
+      t.it('with only string refDate', undefined, refDate)
+        .it('with only Date refDate', undefined, new Date(refDate))
+        .it('with value', 10, refDate);
     });
-  }
 
-  // Create and log-back the seed for debug purposes
-  faker.seed(Math.ceil(Math.random() * 1_000_000_000));
+    t.describeEach(
+      'weekday',
+      'month'
+    )((t) => {
+      t.it('noArgs')
+        .it('with abbr = true', { abbr: true })
+        .it('with context = true', { context: true })
+        .it('with abbr = true and context = true', {
+          abbr: true,
+          context: true,
+        });
+    });
 
-  describe(`random seeded tests for seed ${faker.seedValue}`, () => {
+    t.describe('between', (t) => {
+      t.it(
+        'with string dates',
+        '2021-02-21T17:09:15.711Z',
+        '2021-04-21T17:11:17.711Z'
+      ).it(
+        'with Date dates',
+        new Date('2021-02-21T17:09:15.711Z'),
+        new Date('2021-04-21T17:11:17.711Z')
+      );
+    });
+
+    t.describe('betweens', (t) => {
+      t.it(
+        'with string dates',
+        '2021-02-21T17:09:15.711Z',
+        '2021-04-21T17:11:17.711Z'
+      )
+        .it(
+          'with Date dates',
+          new Date('2021-02-21T17:09:15.711Z'),
+          new Date('2021-04-21T17:11:17.711Z')
+        )
+        .it(
+          'with string dates and count',
+          '2021-02-21T17:09:15.711Z',
+          '2021-04-21T17:11:17.711Z',
+          5
+        )
+        .it(
+          'with Date dates and count',
+          new Date('2021-02-21T17:09:15.711Z'),
+          new Date('2021-04-21T17:11:17.711Z'),
+          5
+        );
+    });
+
+    t.describe('birthdate', (t) => {
+      t.it('with only refDate', { refDate })
+        .it('with age mode and refDate', {
+          mode: 'age',
+          refDate,
+        })
+        .it('with age and refDate', {
+          min: 40,
+          max: 40,
+          mode: 'age',
+          refDate,
+        })
+        .it('with age range and refDate', {
+          min: 20,
+          max: 80,
+          mode: 'age',
+          refDate,
+        })
+        .it('with year mode and refDate', {
+          mode: 'year',
+          refDate,
+        })
+        .it('with year and refDate', {
+          min: 2000,
+          max: 2000,
+          mode: 'age',
+          refDate,
+        })
+        .it('with year range and refDate', {
+          min: 1900,
+          max: 2000,
+          mode: 'age',
+          refDate,
+        });
+    });
+  });
+
+  describe(`random seeded tests for seed ${faker.seed()}`, () => {
     for (let i = 1; i <= NON_SEEDED_BASED_RUN; i++) {
       describe('past()', () => {
         it('should return a date 5 years in the past', () => {
@@ -444,20 +136,18 @@ describe('date', () => {
           expect(date).lessThan(refDate);
         });
 
-        it('should return a past date relative to given refDate', () => {
-          const refDate = new Date();
-          refDate.setFullYear(refDate.getFullYear() + 5);
+        it.each(converterMap)(
+          'should return a past date relative to given refDate',
+          (converter) => {
+            const refDate = new Date();
+            refDate.setFullYear(refDate.getFullYear() + 5);
 
-          let date = faker.date.past(5, refDate);
+            const date = faker.date.past(5, converter(refDate));
 
-          expect(date).lessThan(refDate);
-          expect(date).greaterThan(new Date());
-
-          date = faker.date.past(5, refDate.toISOString());
-
-          expect(date).lessThan(refDate);
-          expect(date).greaterThan(new Date());
-        });
+            expect(date).lessThan(refDate);
+            expect(date).greaterThan(new Date());
+          }
+        );
       });
 
       describe('future()', () => {
@@ -474,41 +164,50 @@ describe('date', () => {
           expect(date).greaterThan(refDate); // date should be after the date given
         });
 
-        it('should return a date 75 years after the date given', () => {
-          const refDate = new Date(1880, 11, 9, 10, 0, 0, 0); // set the date beyond the usual calculation (to make sure this is working correctly)
+        it.each(converterMap)(
+          'should return a date 75 years after the date given',
+          (converter) => {
+            const refDate = new Date(1880, 11, 9, 10, 0, 0, 0); // set the date beyond the usual calculation (to make sure this is working correctly)
 
-          const date = faker.date.future(75, refDate.toISOString());
+            const date = faker.date.future(75, converter(refDate));
 
-          // date should be after the date given, but before the current time
-          expect(date).greaterThan(refDate);
-          expect(date).lessThan(new Date());
-        });
+            // date should be after the date given, but before the current time
+            expect(date).greaterThan(refDate);
+            expect(date).lessThan(new Date());
+          }
+        );
       });
 
       describe('between()', () => {
-        it('should return a random date between the dates given', () => {
-          const from = new Date(1990, 5, 7, 9, 11, 0, 0);
-          const to = new Date(2000, 6, 8, 10, 12, 0, 0);
+        it.each(converterMap)(
+          'should return a random date between the dates given',
+          (converter) => {
+            const from = new Date(1990, 5, 7, 9, 11, 0, 0);
+            const to = new Date(2000, 6, 8, 10, 12, 0, 0);
 
-          const date = faker.date.between(from, to);
+            const date = faker.date.between(converter(from), converter(to));
 
-          expect(date).greaterThan(from);
-          expect(date).lessThan(to);
-        });
+            expect(date).greaterThan(from);
+            expect(date).lessThan(to);
+          }
+        );
       });
 
       describe('betweens()', () => {
-        it('should return an array of 3 dates ( by default ) of sorted randoms dates between the dates given', () => {
-          const from = new Date(1990, 5, 7, 9, 11, 0, 0);
-          const to = new Date(2000, 6, 8, 10, 12, 0, 0);
+        it.each(converterMap)(
+          'should return an array of 3 dates ( by default ) of sorted randoms dates between the dates given',
+          (converter) => {
+            const from = new Date(1990, 5, 7, 9, 11, 0, 0);
+            const to = new Date(2000, 6, 8, 10, 12, 0, 0);
 
-          const dates = faker.date.betweens(from, to);
+            const dates = faker.date.betweens(converter(from), converter(to));
 
-          expect(dates[0]).greaterThan(from);
-          expect(dates[0]).lessThan(to);
-          expect(dates[1]).greaterThan(dates[0]);
-          expect(dates[2]).greaterThan(dates[1]);
-        });
+            expect(dates[0]).greaterThan(from);
+            expect(dates[0]).lessThan(to);
+            expect(dates[1]).greaterThan(dates[0]);
+            expect(dates[2]).greaterThan(dates[1]);
+          }
+        );
       });
 
       describe('recent()', () => {
@@ -518,25 +217,28 @@ describe('date', () => {
           expect(date).lessThanOrEqual(new Date());
         });
 
-        it('should return a date N days from the recent past, starting from refDate', () => {
-          const days = 30;
-          const refDate = new Date(2120, 11, 9, 10, 0, 0, 0); // set the date beyond the usual calculation (to make sure this is working correctly)
+        it.each(converterMap)(
+          'should return a date N days from the recent past, starting from refDate',
+          (converter) => {
+            const days = 30;
+            const refDate = new Date(2120, 11, 9, 10, 0, 0, 0); // set the date beyond the usual calculation (to make sure this is working correctly)
 
-          const date = faker.date.recent(days, refDate);
+            const lowerBound = new Date(
+              refDate.getTime() - days * 24 * 60 * 60 * 1000
+            );
 
-          const lowerBound = new Date(
-            refDate.getTime() - days * 24 * 60 * 60 * 1000
-          );
+            const date = faker.date.recent(days, converter(refDate));
 
-          expect(
-            lowerBound,
-            '`recent()` date should not be further back than `n` days ago'
-          ).lessThanOrEqual(date);
-          expect(
-            date,
-            '`recent()` date should not be ahead of the starting date reference'
-          ).lessThanOrEqual(refDate);
-        });
+            expect(
+              lowerBound,
+              '`recent()` date should not be further back than `n` days ago'
+            ).lessThanOrEqual(date);
+            expect(
+              date,
+              '`recent()` date should not be ahead of the starting date reference'
+            ).lessThanOrEqual(refDate);
+          }
+        );
       });
 
       describe('soon()', () => {
@@ -546,25 +248,28 @@ describe('date', () => {
           expect(date).greaterThanOrEqual(new Date());
         });
 
-        it('should return a date N days from the recent future, starting from refDate', () => {
-          const days = 30;
-          const refDate = new Date(1880, 11, 9, 10, 0, 0, 0); // set the date beyond the usual calculation (to make sure this is working correctly)
+        it.each(converterMap)(
+          'should return a date N days from the recent future, starting from refDate',
+          (converter) => {
+            const days = 30;
+            const refDate = new Date(1880, 11, 9, 10, 0, 0, 0); // set the date beyond the usual calculation (to make sure this is working correctly)
 
-          const date = faker.date.soon(days, refDate);
+            const upperBound = new Date(
+              refDate.getTime() + days * 24 * 60 * 60 * 1000
+            );
 
-          const upperBound = new Date(
-            refDate.getTime() + days * 24 * 60 * 60 * 1000
-          );
+            const date = faker.date.soon(days, converter(refDate));
 
-          expect(
-            date,
-            '`soon()` date should not be further ahead than `n` days ago'
-          ).lessThanOrEqual(upperBound);
-          expect(
-            refDate,
-            '`soon()` date should not be behind the starting date reference'
-          ).lessThanOrEqual(date);
-        });
+            expect(
+              date,
+              '`soon()` date should not be further ahead than `n` days ago'
+            ).lessThanOrEqual(upperBound);
+            expect(
+              refDate,
+              '`soon()` date should not be behind the starting date reference'
+            ).lessThanOrEqual(date);
+          }
+        );
       });
 
       describe('month()', () => {
@@ -654,6 +359,45 @@ describe('date', () => {
           expect(faker.definitions.date.weekday.abbr).toContain(weekday);
 
           faker.definitions.date.weekday.abbr_context = backup_abbr_context;
+        });
+      });
+
+      describe('birthdate', () => {
+        it('returns a random birthdate', () => {
+          const birthdate = faker.date.birthdate();
+          expect(birthdate).toBeInstanceOf(Date);
+        });
+
+        it('returns a random birthdate between two years', () => {
+          const min = 1990;
+          const max = 2000;
+
+          const birthdate = faker.date.birthdate({ min, max, mode: 'year' });
+
+          // birthdate is a date object
+          expect(birthdate).toBeInstanceOf(Date);
+
+          // Generated date is between min and max
+          expect(birthdate.getUTCFullYear()).toBeGreaterThanOrEqual(min);
+          expect(birthdate.getUTCFullYear()).toBeLessThanOrEqual(max);
+        });
+
+        it('returns a random birthdate between two ages', () => {
+          const min = 4;
+          const max = 5;
+
+          const birthdate = faker.date.birthdate({ min, max, mode: 'age' });
+
+          // birthdate is a date object
+          expect(birthdate).toBeInstanceOf(Date);
+
+          // Generated date is between min and max
+          expect(birthdate.getUTCFullYear()).toBeGreaterThanOrEqual(
+            new Date().getUTCFullYear() - max - 1
+          );
+          expect(birthdate.getUTCFullYear()).toBeLessThanOrEqual(
+            new Date().getUTCFullYear() - min
+          );
         });
       });
     }
